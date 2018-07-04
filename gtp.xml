@@ -312,39 +312,9 @@ u3 = GTPUser(3);
 system c, u0, u1, u2, u3;</system>
 	<queries>
 		<query>
-			<formula>(high[0] and high[1] and high[2] and high[3] and tick[0] == tick[1] and tick[1] == tick[2] and tick[2] == tick[3] and tick[3] == tick[0]) --&gt; ()
+			<formula>A&lt;&gt; get_synched(1) == true
 			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>(high[0] and high[1] and high[2] and high[3] and tick[0] == tick[1] and tick[1] == tick[2] and tick[2] == tick[3] and tick[3] == tick[0]) --&gt; (high[0] and high[1] and high[2] and high[3] and diff(0,1) &lt;= 1 and diff(0,2) &lt;= 1 and diff(0, 3) &lt;= 1)
-			</formula>
-			<comment>this does hold (but is a weaker version of the below one)
-			</comment>
-		</query>
-		<query>
-			<formula>(high[0] and high[1] and high[2] and high[3] and tick[0] == tick[1] and tick[1] == tick[2] and tick[2] == tick[3] and tick[3] == tick[0]) --&gt; (high[0] and high[1] and high[2] and high[3] and tick[0] == tick[1] and tick[1] == tick[2] and tick[2] == tick[3] and tick[3] == tick[0])
-			</formula>
-			<comment>this holds
-			</comment>
-		</query>
-		<query>
-			<formula>(high[0] and high[1] and high[2] and high[3]) --&gt; (high[0] and high[1] and high[2] and high[3])
-			</formula>
-			<comment>this holds
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; high[0] and high[1] and high[2] and high[3] and tick[0] == tick[1] and tick[0] == tick[2] and tick[0] == tick[3]
-			</formula>
-			<comment>this holds (it eventually reach a state where they are all synchronized)
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; high[0] and high[1] and high[2] and high[3]
-			</formula>
-			<comment>this holds (it eventually reach a state where they are all synchronized)
+			<comment>Phi_1: it does hold
 			</comment>
 		</query>
 		<query>
@@ -354,62 +324,23 @@ system c, u0, u1, u2, u3;</system>
 			</comment>
 		</query>
 		<query>
-			<formula>A[] get_synched(1) == false
+			<formula>get_synched(1) == true --&gt; get_synched(1) == true
 			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>A&lt;&gt; get_synched(1) == true
-			</formula>
-			<comment>Phi_1
+			<comment>Phi_3 : it does hold
 			</comment>
 		</query>
 		<query>
 			<formula>get_synched(1) == true --&gt; get_synched(1) == false
 			</formula>
-			<comment>Phi_4: this deos not hold
+			<comment>Phi_4: this does not hold
 			</comment>
 		</query>
 		<query>
-			<formula>get_synched(1) == true --&gt; get_synched(1) == true
+			<formula>get_synched(1) == false --&gt; get_synched(1) == true
 			</formula>
-			<comment>equivalente della seguente:
+			<comment>Phi_5: this does not hold
+			</comment>
+		</query>
 
-\forall i : User. \globally_{\ge 0} (H&lt;U,i&gt; -&gt; \future H&lt;U,i&gt;)
-
-Phi_3
-			</comment>
-		</query>
-		<query>
-			<formula>num_synched() == SIZE --&gt; num_synched() == SIZE
-			</formula>
-			<comment>questa formula vale: una volta raggiunta la sincronia, tutte le strade consentono di tornare sincroni (occorre controllare separatamente che sia possibile raggiungere la sincronia, in prima istanza)
-			</comment>
-		</query>
-		<query>
-			<formula>num_synched() == SIZE --&gt; num_synched() &lt; SIZE
-			</formula>
-			<comment>questa proprieta` non vale; il controesempio e` ok: una vola raggiunta la sincronia, continuano a battere in maniera sincrona (e` ragionevole che possa accadere)
-			</comment>
-		</query>
-		<query>
-			<formula>num_synched() &lt; SIZE --&gt; num_synched() == SIZE
-			</formula>
-			<comment>questa non vale: da uno stato non-sincrono, non e` sempre possibile raggiungere la sincronizzazione; il controesempio e` ragionevole: da uno stato non sincrono, si continua a fare gossiping con istanze con clock "cattivi" (in effetti nel modell non c'e` fairness ne` probabilita` di scegliere prima o poi una sorgente di tempo migliore)
-			</comment>
-		</query>
-		<query>
-			<formula>A[] not get_synched(1) == true
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; num_synched() == SIZE
-			</formula>
-			<comment>vale; specifica che e` possibile raggiungere uno stato sincrono
-			</comment>
-		</query>
 	</queries>
 </nta>

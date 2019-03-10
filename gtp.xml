@@ -9,21 +9,17 @@
 // it is not clear how to "bound" the interval in which two clocks can be un-synchronized (given the restrictive syntax of Uppaal specifications);
 // we should also see how it scales to a cutoff size and double check the model actually falls in the family of disjunctive timed networks
 
-// SIZE: number of copies in the system (including the controller)
+// SIZE: number of copies in the system
 const int SIZE = 4;
 // PERIOD: discrete clock period; the clock cycles from 0 till PERIOD-1, than it goes back to 0
 const int PERIOD = 3;
-
-// MIN_NUM_HIGH: this parameter sets the minimum number of processes that are synchronous with the GTPController (including the GTPController itself), at any time; 
-//               ideally, all the processes with id such that: (0 &lt; id &lt; MIN_NUM_HIGH), are not expected to skew their clock value from the one of the GTPController
-const int MIN_NUM_HIGH = 1; // SIZE / 2; for the moment, assume only the Controller is always synchronized
 
 // tick: it stores, for each process id, the current clock value
 meta int[0,PERIOD] tick[SIZE];
 
 // high: an array storing, for each process id, whether it is currently synchronized with the clock source (high[id] = true) or not (high[id] = false);
 //       this array is used to encode the disjunctive guard, since Uppaal does not allow to refer to other process locations
-meta int synched[SIZE];
+int synched[SIZE];
 
 
 
@@ -121,6 +117,20 @@ bool check_exists_synched(int proc_id, bool synched) {
 		</location>
 		<init ref="id6"/>
 		<transition>
+			<source ref="id4"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-33" y="-149">ph &gt; 1 and check_exists_synched(id, true)</label>
+			<label kind="assignment" x="-33" y="-115">inc_tick(id), ph := 0, 
+set_synched(id, false), c_resync := 0</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-373" y="-153">ph &lt; 1 and check_exists_synched(id, true)</label>
+			<label kind="assignment" x="-373" y="-119">inc_tick(id), ph := 0, 
+set_synched(id, false), c_resync := 0</label>
+		</transition>
+		<transition>
 			<source ref="id2"/>
 			<target ref="id3"/>
 			<label kind="guard" x="-17" y="-246">ph &gt;= 1 and check_exists(id, 2, true)</label>
@@ -209,13 +219,15 @@ c_resync := 0</label>
 			<label kind="guard" x="42" y="-178">ph &lt; 1 and check_exists_synched(id, true)</label>
 			<label kind="assignment" x="76" y="-153">inc_tick(id), ph := 0, 
 set_synched(id, false), c_resync := 0</label>
+			<nail x="-8" y="-263"/>
 		</transition>
 		<transition>
 			<source ref="id5"/>
 			<target ref="id1"/>
-			<label kind="guard" x="-374" y="-255">ph &lt; 1 and check_exists_synched(id, true)</label>
+			<label kind="guard" x="-374" y="-255">ph &gt; 1 and check_exists_synched(id, true)</label>
 			<label kind="assignment" x="-348" y="-238">inc_tick(id), ph := 0, 
 set_synched(id, false), c_resync := 0</label>
+			<nail x="-340" y="-272"/>
 		</transition>
 		<transition>
 			<source ref="id3"/>
@@ -245,72 +257,23 @@ set_synched(id, true)</label>
 			<label kind="assignment" x="-714" y="-272">set_tick(id, 0), ph := 0, set_synched(id, true)</label>
 		</transition>
 	</template>
-	<template>
-		<name x="9" y="9">GTPController</name>
-		<parameter>int id</parameter>
-		<declaration>// the GTPController process, is the "accurate and robust time source" required by GTP (see Sec. 3). Only one instance of this process must exist in the network
-// 
-
-clock ph;
-
-/*
-int [0,PERIOD] tick = 0;
-*/
-/*
-void inc_tick() {
-    tick = (tick + 1) % PERIOD;
-}
-*/</declaration>
-		<location id="id7" x="-3799" y="-510">
-			<label kind="invariant" x="-3809" y="-493">ph &lt;= 1</label>
-		</location>
-		<location id="id8" x="-3961" y="-510">
-			<label kind="invariant" x="-3971" y="-493">ph &lt;= 1</label>
-		</location>
-		<location id="id9" x="-4131" y="-510">
-			<label kind="invariant" x="-4141" y="-493">ph &lt;= 1</label>
-		</location>
-		<location id="id10" x="-4513" y="-509">
-			<committed/>
-		</location>
-		<init ref="id10"/>
-		<transition>
-			<source ref="id7"/>
-			<target ref="id9"/>
-			<label kind="guard" x="-4104" y="-416">ph == 1</label>
-			<label kind="assignment" x="-4104" y="-382">ph := 0</label>
-			<nail x="-3791" y="-382"/>
-			<nail x="-4122" y="-382"/>
-		</transition>
-		<transition>
-			<source ref="id8"/>
-			<target ref="id7"/>
-			<label kind="guard" x="-3943" y="-544">ph == 1</label>
-			<label kind="assignment" x="-3943" y="-510">ph := 0</label>
-		</transition>
-		<transition>
-			<source ref="id9"/>
-			<target ref="id8"/>
-			<label kind="guard" x="-4113" y="-544">ph == 1</label>
-			<label kind="assignment" x="-4113" y="-510">ph := 0</label>
-		</transition>
-		<transition>
-			<source ref="id10"/>
-			<target ref="id9"/>
-			<label kind="assignment" x="-4479" y="-501">ph := 0</label>
-		</transition>
-	</template>
 	<system>// Place template instantiations here.
 
-c = GTPController(0);
 u0 = GTPUser(0);
 u1 = GTPUser(1);
 u2 = GTPUser(2);
 u3 = GTPUser(3);
 
 // List one or more processes to be composed into a system.
-system c, u0, u1, u2, u3;</system>
+
+system u0, u1, u2, u3;</system>
 	<queries>
+		<query>
+			<formula>A&lt;&gt; get_synched(1) == false
+			</formula>
+			<comment>
+			</comment>
+		</query>
 		<query>
 			<formula>A&lt;&gt; get_synched(1) == true
 			</formula>
